@@ -1,8 +1,8 @@
 package ru.putnik.athena.controller;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -10,25 +10,21 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import ru.putnik.athena.pojo.Group;
+import ru.putnik.athena.model.MainModel;
+import ru.putnik.athena.pojo.GroupData;
 
-import java.io.File;
 import java.net.URL;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
 
 /**
- * Создано 01.08.2019 в 16:43
+ * Создано 14.08.2019
  */
 public class MainController extends Application implements Initializable {
-  //  private MainModel mainModel=new MainModel();
+    private MainModel mainModel=new MainModel();
+    private AddEditGroupController addEditGroupController =new AddEditGroupController();
 
     private static Stage stage;
    // private String pathToWordFile;
@@ -65,21 +61,21 @@ public class MainController extends Application implements Initializable {
     @FXML
     private MenuItem findGroupMenuItem;
     @FXML
-    private TableView<Group> groupTable;
+    private TableView<GroupData> groupTable;
     @FXML
-    private TableColumn<Group,Integer> numberColumn;
+    private TableColumn<GroupData,Integer> numberColumn;
     @FXML
-    private TableColumn<Group,String> nameColumn;
+    private TableColumn<GroupData,String> nameColumn;
     @FXML
-    private TableColumn<Group,String> addressColumn;
+    private TableColumn<GroupData,String> addressColumn;
     @FXML
-    private TableColumn<Group,String> loginColumn;
+    private TableColumn<GroupData,String> loginColumn;
     @FXML
-    private TableColumn<Group,String> passwordColumn;
+    private TableColumn<GroupData,String> passwordColumn;
     @FXML
-    private TableColumn<Group,String> emailColumn;
+    private TableColumn<GroupData,String> emailColumn;
     @FXML
-    private TableColumn<Group,String> commentColumn;
+    private TableColumn<GroupData,String> commentColumn;
     @FXML
     private Label countGroupsLabel;
 
@@ -95,8 +91,8 @@ public class MainController extends Application implements Initializable {
             System.out.println("Нет иконки главного окна");
         }
         primaryStage.setResizable(true);
-        primaryStage.setWidth(730);
-        primaryStage.setHeight(630);
+        primaryStage.setWidth(780);
+        primaryStage.setHeight(530);
         primaryStage.show();
     }
 
@@ -104,8 +100,17 @@ public class MainController extends Application implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 //        pathToWordFile=settingController.getPathToWordBook();
-//        pathToGroupFile=settingController.getPathToGroupFile();
         stage.setTitle("Athena");
+        stage.setOnCloseRequest(event -> {
+            Platform.exit();
+            System.exit(0);
+        });
+        addGroupMenuItem.setOnAction(event -> {
+            addEditGroupController.showWindow(AddEditGroupController.TypeOperation.ADDING);
+        });
+        editGroupMenuItem.setOnAction(event -> {
+            addEditGroupController.showWindow(AddEditGroupController.TypeOperation.EDITING);
+        });
 
  /*       addWordMenuItem.setOnAction(event -> {
             addEditController.addWord();
@@ -136,11 +141,13 @@ public class MainController extends Application implements Initializable {
             deleteWordMenuItem.fire();
         });*/
 
-     /*   indexColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getNumber()));
-        wordColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getWord()));
-        translateColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getTranslate()));
-        groupColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getGroup()));
-        commentColumn.setCellValueFactory(value->new SimpleObjectProperty<>(value.getValue().getComment()));*/
+        numberColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getNumber()));
+        nameColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getName()));
+        addressColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getAddress()));
+        loginColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getLogin()));
+        passwordColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getPassword()));
+        emailColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getEmail()));
+        commentColumn.setCellValueFactory(value->new SimpleObjectProperty<>(value.getValue().getComment()));
     /*    if(pathToWordFile!=null) {
             if(mainModel.openWordBook(pathToWordFile)){
                 stage.setTitle(stage.getTitle() + " [" + pathToWordFile + "]");
@@ -148,7 +155,7 @@ public class MainController extends Application implements Initializable {
                 pathOpenWordFile=pathToWordFile;
             }
         }*/
-   //     wordTable.setItems(mainModel.getWordList());
+        groupTable.setItems(mainModel.getListData());
 /*        if(mainModel.getWordList().size()>0){
             deleteWord.setDisable(false);
             editWord.setDisable(false);
@@ -407,9 +414,9 @@ public class MainController extends Application implements Initializable {
         launch();
     }
 
-   // public MainModel getMainModel() {
-   //     return mainModel;
- //   }
+    public MainModel getMainModel() {
+        return mainModel;
+    }
 
     public Stage getStage() {
         return stage;

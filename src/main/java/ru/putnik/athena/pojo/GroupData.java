@@ -3,7 +3,7 @@ package ru.putnik.athena.pojo;
 /**
  * Создано 19.08.2019 в 22:30
  */
-public class Group {
+public class GroupData {
     private Integer number;
     private String name;
     private String address;
@@ -12,7 +12,7 @@ public class Group {
     private String email;
     private String comment;
 
-    public Group(Integer number, String name, String address, String login, String password, String email, String comment) {
+    public GroupData(Integer number, String name, String address, String login, String password, String email, String comment) {
         this.number = number;
         this.name = name;
         this.address = address;
@@ -22,7 +22,7 @@ public class Group {
         this.comment = comment;
     }
 
-    public Group() {}
+    public GroupData() {}
 
     public Integer getNumber() {
         return number;
