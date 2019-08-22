@@ -23,6 +23,7 @@ public class AddEditGroupController implements Initializable {
     private static Stage stage;
     private static MainController mainController;
     private static TypeOperation operation;
+    private boolean added=false;
 
     @FXML
     private TextField nameTextField;
@@ -45,7 +46,7 @@ public class AddEditGroupController implements Initializable {
     }
     public AddEditGroupController(){}
 
-    public void showWindow(TypeOperation operation){
+    public boolean showWindow(TypeOperation operation){
         stage=new Stage();
         AddEditGroupController.operation=operation;
 
@@ -59,9 +60,12 @@ public class AddEditGroupController implements Initializable {
             }else{
                 stage.setTitle("Athena - Редактировать группу данных");
             }
-            stage.show();
+            stage.showAndWait();
+
+            return added;
         } catch (IOException e) {
             e.printStackTrace();
+            return added;
         }
     }
     @Override
@@ -70,6 +74,7 @@ public class AddEditGroupController implements Initializable {
             addEditGroupButton.setText("Добавить");
         }else{
             addEditGroupButton.setText("Сохранить");
+            //TODO: Добавить вывод существующих данных для редактирования. mainController.groupTable.getSelectionModel().getSelectedIndex()
         }
         addEditGroupButton.setOnAction(event -> {
            // if(){  TODO: добавить проверки
@@ -82,6 +87,7 @@ public class AddEditGroupController implements Initializable {
             data.setComment(commentTextField.getText());
 
             MainModel.getListData().add(data);
+            added=true;
            // }
         });
         exitButton.setOnAction(event -> {

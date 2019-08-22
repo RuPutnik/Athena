@@ -40,12 +40,12 @@
             </placeholder>
             <columns>
                 <TableColumn fx:id="numberColumn" text="Номер" />
-                <TableColumn fx:id="nameColumn" text="Имя" />
+                <TableColumn fx:id="nameColumn" text="Название" />
                 <TableColumn fx:id="addressColumn" text="Адрес" />
                 <TableColumn fx:id="loginColumn" text="Логин" />
                 <TableColumn fx:id="passwordColumn" text="Пароль" />
                 <TableColumn fx:id="emailColumn" text="Email" />
-                <TableColumn fx:id="commentColumn" text="Комментарий"/>
+                <TableColumn fx:id="commentColumn" text="Примечание"/>
             </columns>
             <contextMenu>
                 <ContextMenu>

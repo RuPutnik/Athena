@@ -3,6 +3,7 @@ package ru.putnik.athena.controller;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -10,6 +11,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import ru.putnik.athena.model.MainModel;
 import ru.putnik.athena.pojo.GroupData;
@@ -17,6 +20,9 @@ import ru.putnik.athena.pojo.GroupData;
 import java.net.URL;
 import java.util.Objects;
 import java.util.ResourceBundle;
+
+import static ru.putnik.athena.AthenaAlerts.callAlert;
+import static ru.putnik.athena.AthenaAlerts.callWaitAlert;
 
 
 /**
@@ -106,40 +112,37 @@ public class MainController extends Application implements Initializable {
             System.exit(0);
         });
         addGroupMenuItem.setOnAction(event -> {
-            addEditGroupController.showWindow(AddEditGroupController.TypeOperation.ADDING);
+            if(addEditGroupController.showWindow(AddEditGroupController.TypeOperation.ADDING)) {
+                countGroupsLabel.setText(String.valueOf(MainModel.getListData().size()));
+                deleteGroupContext.setDisable(false);
+                editGroupContext.setDisable(false);
+            }
         });
         editGroupMenuItem.setOnAction(event -> {
             addEditGroupController.showWindow(AddEditGroupController.TypeOperation.EDITING);
         });
-
- /*       addWordMenuItem.setOnAction(event -> {
-            addEditController.addWord();
-            if(mainModel.getWordList().size()>0){
-                countWordsLabel.setText(String.valueOf(mainModel.getWordList().size()));
-                deleteWord.setDisable(false);
-                editWord.setDisable(false);
-            }
-        });
-        editWordMenuItem.setOnAction(event -> {addEditController.editWord(wordTable.getSelectionModel().getSelectedIndex());});
-        deleteWordMenuItem.setOnAction(event -> {
-            int index=wordTable.getSelectionModel().getSelectedIndex();
+        deleteGroupMenuItem.setOnAction(event -> {
+            int index=groupTable.getSelectionModel().getSelectedIndex();
             if(index!=-1) {
-                mainModel.deleteWord(index);
-                countWordsLabel.setText(String.valueOf(mainModel.getWordList().size()));
+                MainModel.getListData().remove(index);
+                countGroupsLabel.setText(String.valueOf(MainModel.getListData().size()));
             }else{
-                callAlert(Alert.AlertType.WARNING,"Невозможно удалить слово",null,"Слово не выбрано");
+                callAlert(Alert.AlertType.WARNING,"Невозможно удалить группу данных",null,"Группа данных не выбрана");
             }
-            if(mainModel.getWordList().size()==0){
-                deleteWord.setDisable(true);
-                editWord.setDisable(true);
+            if(MainModel.getListData().size()==0){
+                deleteGroupContext.setDisable(true);
+                editGroupContext.setDisable(true);
             }
         });
-        settingsMenuItem.setOnAction(event -> {settingController.createWindow();});
-        addWord.setOnAction(event -> {addWordMenuItem.fire();});
-        editWord.setOnAction(event -> {editWordMenuItem.fire();});
-        deleteWord.setOnAction(event -> {
-            deleteWordMenuItem.fire();
-        });*/
+        deleteAllGroupsMenuItem.setOnAction(event -> {
+            MainModel.getListData().clear();
+        });
+
+
+        /*  settingsMenuItem.setOnAction(event -> {settingController.createWindow();});*/
+        addGroupContext.setOnAction(event -> {addGroupMenuItem.fire();});
+        editGroupContext.setOnAction(event -> {editGroupMenuItem.fire();});
+        deleteGroupContext.setOnAction(event -> {deleteGroupMenuItem.fire();});
 
         numberColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getNumber()));
         nameColumn.setCellValueFactory(value-> new SimpleObjectProperty<>(value.getValue().getName()));
@@ -156,12 +159,12 @@ public class MainController extends Application implements Initializable {
             }
         }*/
         groupTable.setItems(mainModel.getListData());
-/*        if(mainModel.getWordList().size()>0){
-            deleteWord.setDisable(false);
-            editWord.setDisable(false);
-            addWord.setDisable(false);
+       if(MainModel.getListData().size()>0){
+            deleteGroupContext.setDisable(false);
+            editGroupContext.setDisable(false);
+            addGroupContext.setDisable(false);
         }
-        createWordbook.setOnAction(event -> {
+    /*     createWordbook.setOnAction(event -> {
             String nameFile=createNewWordbook();
 
             String path=mainModel.createWordBook(nameFile);
@@ -232,9 +235,9 @@ public class MainController extends Application implements Initializable {
                     }
 
                 }
-        });
-        findWordMenuItem.setOnAction(event -> {
-            if (pathOpenWordFile != null && !pathOpenWordFile.equals("") && new File(pathOpenWordFile).exists()) {
+        });*/
+        findGroupMenuItem.setOnAction(event -> {
+            if(MainModel.getListData().size()>0){
                 int numberWord = -1;
                 String valueCategory="";
                 String typeCategory="";
@@ -243,7 +246,7 @@ public class MainController extends Application implements Initializable {
                 double positionAlertY=-1;
                 while (true) {
                     Alert findAlert = new Alert(Alert.AlertType.CONFIRMATION);
-                    findAlert.setTitle("Поиск слова");
+                    findAlert.setTitle("Поиск группы данных");
                     findAlert.setHeaderText("Выберите критерий поиска и введите искомое значение:");
                     findAlert.initModality(Modality.NONE);
                     findAlert.getDialogPane().toBack();
@@ -253,11 +256,15 @@ public class MainController extends Application implements Initializable {
                     if(positionAlertY!=-1){
                         findAlert.setY(positionAlertY);
                     }
+                    try {
                     ((Stage) findAlert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icon/mainIcon.png"));
+                    }catch (Exception ex){
+                        System.out.println("Нет иконки окна");
+                    }
                     ((Stage) findAlert.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
                     HBox box = new HBox();
                     box.setSpacing(5);
-                    ComboBox<String> parameterWord = new ComboBox<>(FXCollections.observableArrayList("Свободно", "Слово", "Перевод", "Группа"));
+                    ComboBox<String> parameterWord = new ComboBox<>(FXCollections.observableArrayList("Свободно", "Название", "Адрес", "Логин","Пароль","Email"));
                     parameterWord.setPromptText("Критерий поиска");
                     TextField textField = new TextField();
                     box.getChildren().addAll(parameterWord, textField);
@@ -278,57 +285,77 @@ public class MainController extends Application implements Initializable {
                         valueCategory=textField.getText();
 
                         if (!textField.getText().equals("")) {
-                            for (int n = 0; n < wordTable.getItems().size(); n++) {
+                            for (int n = 0; n < groupTable.getItems().size(); n++) {
                                 if(n>numberWord&&resumeFind) {
                                     String category="";
                                     if(parameterWord.getValue()!=null){
                                         category=parameterWord.getValue();
                                     }
                                     switch (category) {
-                                        case "Слово": {
-                                            if (wordTable.getItems().get(n).getWord().toLowerCase().equals(textField.getText().toLowerCase())) {
-                                                wordTable.getSelectionModel().select(n);
+                                        case "Название": {
+                                            if (groupTable.getItems().get(n).getName().toLowerCase().equals(textField.getText().toLowerCase())) {
+                                                groupTable.getSelectionModel().select(n);
                                                 numberWord = n;
                                                 resumeFind=false;
                                             }
                                             break;
                                         }
-                                        case "Перевод": {
-                                            if (wordTable.getItems().get(n).getTranslate().toLowerCase().equals(textField.getText().toLowerCase())) {
-                                                wordTable.getSelectionModel().select(n);
+                                        case "Адрес": {
+                                            if (groupTable.getItems().get(n).getAddress().toLowerCase().equals(textField.getText().toLowerCase())) {
+                                                groupTable.getSelectionModel().select(n);
                                                 numberWord = n;
                                                 resumeFind=false;
                                             }
                                             break;
                                         }
-                                        case "Группа": {
-                                            if (wordTable.getItems().get(n).getGroup().toLowerCase().equals(textField.getText().toLowerCase())) {
-                                                wordTable.getSelectionModel().select(n);
+                                        case "Логин": {
+                                            if (groupTable.getItems().get(n).getLogin().toLowerCase().equals(textField.getText().toLowerCase())) {
+                                                groupTable.getSelectionModel().select(n);
+                                                numberWord = n;
+                                                resumeFind=false;
+                                            }
+                                            break;
+                                        }
+                                        case "Пароль": {
+                                            if (groupTable.getItems().get(n).getPassword().toLowerCase().equals(textField.getText().toLowerCase())) {
+                                                groupTable.getSelectionModel().select(n);
+                                                numberWord = n;
+                                                resumeFind=false;
+                                            }
+                                            break;
+                                        }
+                                        case "Email": {
+                                            if (groupTable.getItems().get(n).getEmail().toLowerCase().equals(textField.getText().toLowerCase())) {
+                                                groupTable.getSelectionModel().select(n);
                                                 numberWord = n;
                                                 resumeFind=false;
                                             }
                                             break;
                                         }
                                         case "": {
-                                            String word = wordTable.getItems().get(n).getWord();
-                                            String translate = wordTable.getItems().get(n).getTranslate();
-                                            String group = wordTable.getItems().get(n).getGroup();
-                                            if (word.toLowerCase().equals(textField.getText().toLowerCase()) || translate.toLowerCase().equals(textField.getText().toLowerCase()) ||
-                                                    group.toLowerCase().equals(textField.getText().toLowerCase())) {
-                                                wordTable.getSelectionModel().select(n);
+                                            String name = groupTable.getItems().get(n).getName();
+                                            String address = groupTable.getItems().get(n).getAddress();
+                                            String login = groupTable.getItems().get(n).getLogin();
+                                            String password = groupTable.getItems().get(n).getPassword();
+                                            String email = groupTable.getItems().get(n).getEmail();
+                                            if (name.toLowerCase().equals(textField.getText().toLowerCase()) || address.toLowerCase().equals(textField.getText().toLowerCase()) ||
+                                                    login.toLowerCase().equals(textField.getText().toLowerCase())||password.toLowerCase().equals(textField.getText().toLowerCase())||email.toLowerCase().equals(textField.getText().toLowerCase())) {
+                                                groupTable.getSelectionModel().select(n);
                                                 numberWord = n;
                                                 resumeFind=false;
                                             }
                                             break;
                                         }
                                         case "Свободно": {
-                                            String word = wordTable.getItems().get(n).getWord();
-                                            String translate = wordTable.getItems().get(n).getTranslate();
-                                            String group = wordTable.getItems().get(n).getGroup();
-                                            if (word.toLowerCase().equals(textField.getText().toLowerCase()) || translate.toLowerCase().equals(textField.getText().toLowerCase()) ||
-                                                    group.toLowerCase().equals(textField.getText().toLowerCase())) {
+                                            String name = groupTable.getItems().get(n).getName();
+                                            String address = groupTable.getItems().get(n).getAddress();
+                                            String login = groupTable.getItems().get(n).getLogin();
+                                            String email = groupTable.getItems().get(n).getEmail();
+                                            String password = groupTable.getItems().get(n).getPassword();
+                                            if (name.toLowerCase().equals(textField.getText().toLowerCase()) || address.toLowerCase().equals(textField.getText().toLowerCase()) ||
+                                                    login.toLowerCase().equals(textField.getText().toLowerCase())||password.toLowerCase().equals(textField.getText().toLowerCase())||email.toLowerCase().equals(textField.getText().toLowerCase())) {
+                                                groupTable.getSelectionModel().select(n);
                                                 numberWord = n;
-                                                wordTable.getSelectionModel().select(n);
                                                 resumeFind=false;
                                             }
                                             break;
@@ -337,17 +364,17 @@ public class MainController extends Application implements Initializable {
                                 }
                             }
                         } else {
-                            if(callWaitAlert(Alert.AlertType.WARNING, "Поиск слова", null, "Строка поиска пуста").get()==ButtonType.OK) {
+                            if(callWaitAlert(Alert.AlertType.WARNING, "Поиск группы данных", null, "Строка поиска пуста").get()==ButtonType.OK) {
                                 continue;
                             }
                         }
                         if (numberWord == -1) {
-                            if(callWaitAlert(Alert.AlertType.INFORMATION, "Поиск слова", null, "Слово по данному запросу не обнаружено").get()==ButtonType.OK) {
+                            if(callWaitAlert(Alert.AlertType.INFORMATION, "Поиск группы данных", null, "Группа данных по данному запросу не обнаружена").get()==ButtonType.OK) {
                                 continue;
                             }
                         }
                         resumeFind=true;
-                        if(numberWord==wordTable.getItems().size()-1) {
+                        if(numberWord==groupTable.getItems().size()-1) {
                             numberWord = -1;//Что бы бегать по кругу списка
                         }
                     } else {
@@ -356,10 +383,10 @@ public class MainController extends Application implements Initializable {
                     }
                 }
             } else {
-                callAlert(Alert.AlertType.WARNING, "Невозможно найти слово", null, "Словарь не выбран или файл не существует");
+                callAlert(Alert.AlertType.WARNING, "Невозможно найти группу данных", null, "Группы данных отсутствуют");
             }
 
-        });*/
+        });
         exitMenuItem.setOnAction(event -> {
             stage.close();
         });
@@ -421,7 +448,6 @@ public class MainController extends Application implements Initializable {
     public Stage getStage() {
         return stage;
     }
-
   /*  public String getPathToWordFile() {
         return pathToWordFile;
     }
@@ -429,10 +455,6 @@ public class MainController extends Application implements Initializable {
     public String getPathToGroupFile() {
         return pathToGroupFile;
     }
-
-  //  public GroupManagerController getGroupManagerController() {
- //       return groupManagerController;
-  //  }
 
     public void setPathToGroupFile(String pathToGroupFile) {
         this.pathToGroupFile = pathToGroupFile;
