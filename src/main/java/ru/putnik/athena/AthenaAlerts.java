@@ -11,7 +11,7 @@ import java.util.Optional;
  * Создано 22.08.2019
  */
 public class AthenaAlerts {
-    public static void callAlert(Alert.AlertType type,String title,String header,String content){
+    public static Optional<ButtonType> callAlert(Alert.AlertType type,String title,String header,String content,boolean wait){
         Alert alert=new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(header);
@@ -24,22 +24,12 @@ public class AthenaAlerts {
         }
         ((Stage)alert.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
 
-        alert.show();
-
-    }
-    public static Optional<ButtonType> callWaitAlert(Alert.AlertType type,String title,String header,String content){
-        Alert alert=new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        try{
-        ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icon/mainIcon.png"));
-        }catch (Exception ex){
-            System.out.println("Нет иконки окна");
+        if(wait){
+            return alert.showAndWait();
+        }else {
+            alert.show();
+            return Optional.empty();
         }
-        ((Stage)alert.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
-
-        return alert.showAndWait();
     }
     public static Optional<ButtonType> callConfirmationAlert(String title, String header, String content){
         Alert alert=new Alert(Alert.AlertType.CONFIRMATION);

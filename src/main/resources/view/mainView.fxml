@@ -17,6 +17,7 @@
                 <MenuItem fx:id="createList" text="Создать список" />
                 <MenuItem fx:id="openList" text="Открыть список" />
                 <MenuItem fx:id="saveList" text="Сохранить список"/>
+                <MenuItem fx:id="saveAsList" text="Сохранить список как.."/>
                 <MenuItem fx:id="deleteList" text="Удалить список" />
             </Menu>
             <Menu text="Группы данных">
@@ -61,7 +62,7 @@
             </VBox.margin>
         </TableView>
         <HBox spacing="10" alignment="CENTER_LEFT">
-            <Label text="Всего групп:"/>
+            <Label text="Всего групп данных:"/>
             <Label fx:id="countGroupsLabel" text="0"/>
             <VBox.margin>
                 <Insets bottom="5" left="10" right="10" top="5" />

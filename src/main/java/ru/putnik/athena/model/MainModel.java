@@ -10,6 +10,12 @@ import ru.putnik.athena.pojo.GroupData;
 public class MainModel {
     private static ObservableList<GroupData> listData=FXCollections.observableArrayList();
 
+    public boolean openListData(String path){
+        boolean result=true;
+
+        return result;
+    }
+
     public static ObservableList<GroupData> getListData() {
         return listData;
     }

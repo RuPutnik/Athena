@@ -12,17 +12,18 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import ru.putnik.athena.model.MainModel;
 import ru.putnik.athena.pojo.GroupData;
 
+import java.io.File;
 import java.net.URL;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
 import static ru.putnik.athena.AthenaAlerts.callAlert;
-import static ru.putnik.athena.AthenaAlerts.callWaitAlert;
 
 
 /**
@@ -36,7 +37,7 @@ public class MainController extends Application implements Initializable {
    // private String pathToWordFile;
  //   private String pathToGroupFile;
 
- //   private String pathOpenWordFile;
+    private String pathOpenDataFile;
 
     @FXML
     private MenuItem createList;
@@ -46,6 +47,8 @@ public class MainController extends Application implements Initializable {
     private MenuItem deleteList;
     @FXML
     private MenuItem saveList;
+    @FXML
+    private MenuItem saveAsList;
     @FXML
     private MenuItem addGroupContext;
     @FXML
@@ -127,7 +130,7 @@ public class MainController extends Application implements Initializable {
                 MainModel.getListData().remove(index);
                 countGroupsLabel.setText(String.valueOf(MainModel.getListData().size()));
             }else{
-                callAlert(Alert.AlertType.WARNING,"Невозможно удалить группу данных",null,"Группа данных не выбрана");
+                callAlert(Alert.AlertType.WARNING,"Невозможно удалить группу данных",null,"Группа данных не выбрана",false);
             }
             if(MainModel.getListData().size()==0){
                 deleteGroupContext.setDisable(true);
@@ -155,7 +158,7 @@ public class MainController extends Application implements Initializable {
             if(mainModel.openWordBook(pathToWordFile)){
                 stage.setTitle(stage.getTitle() + " [" + pathToWordFile + "]");
                 countWordsLabel.setText(String.valueOf(mainModel.getWordList().size()));
-                pathOpenWordFile=pathToWordFile;
+                pathOpenDataFile=pathToWordFile;
             }
         }*/
         groupTable.setItems(mainModel.getListData());
@@ -164,6 +167,31 @@ public class MainController extends Application implements Initializable {
             editGroupContext.setDisable(false);
             addGroupContext.setDisable(false);
         }
+        openList.setOnAction(event -> {
+            FileChooser chooser=new FileChooser();
+
+            chooser.setTitle("Выберите файл со словарем");
+            chooser.setInitialDirectory(new File((System.getenv("USERPROFILE") + "\\Desktop\\")));
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("txt","*.txt"));
+            String path;
+            File file=chooser.showOpenDialog(new Stage());
+            if(file!=null) {
+                path = file.getPath();
+                if (mainModel.openListData(path)) {
+                    stage.setTitle("Word Note" + " [" + path + "]");
+                    countGroupsLabel.setText(String.valueOf(MainModel.getListData().size()));
+                    addGroupContext.setDisable(false);
+                    if (MainModel.getListData().size() > 0) {
+                        deleteGroupContext.setDisable(false);
+                        editGroupContext.setDisable(false);
+                    }else{
+                        deleteGroupContext.setDisable(true);
+                        editGroupContext.setDisable(true);
+                    }
+                    pathOpenDataFile=path;
+                }
+            }
+        });
     /*     createWordbook.setOnAction(event -> {
             String nameFile=createNewWordbook();
 
@@ -195,16 +223,16 @@ public class MainController extends Application implements Initializable {
                             deleteWord.setDisable(true);
                             editWord.setDisable(true);
                         }
-                        pathOpenWordFile=path;
+                        pathOpenDataFile=path;
                     }
             }
         });
         deleteWordbook.setOnAction(event -> {
-            if(pathOpenWordFile!=null&&!pathOpenWordFile.equals("")&&new File(pathOpenWordFile).exists()){
+            if(pathOpenDataFile!=null&&!pathOpenDataFile.equals("")&&new File(pathOpenDataFile).exists()){
                 if(callConfirmationAlert("Удаление словаря",null,"Вы действительно хотите удалить файл словаря?").get()==ButtonType.OK) {
-                    new File(pathOpenWordFile).delete();
+                    new File(pathOpenDataFile).delete();
                     stage.setTitle("Word Note");
-                    pathOpenWordFile=null;
+                    pathOpenDataFile=null;
                 }
             }else{
                 callAlert(Alert.AlertType.WARNING,"Невозможно удалить файл словаря",null,"Словарь не выбран или файл не существует");
@@ -219,8 +247,8 @@ public class MainController extends Application implements Initializable {
             }
         });
         saveWordbook.setOnAction(event -> {
-                if (pathOpenWordFile != null && !pathOpenWordFile.equals("") && new File(pathOpenWordFile).exists()) {
-                    new File(pathOpenWordFile).delete();
+                if (pathOpenDataFile != null && !pathOpenDataFile.equals("") && new File(pathOpenDataFile).exists()) {
+                    new File(pathOpenDataFile).delete();
                     String path=createNewWordbook();
                     if(path!=null) {
                         mainModel.rewriteFile(path);
@@ -230,7 +258,7 @@ public class MainController extends Application implements Initializable {
                     if(path!=null) {
                         if(mainModel.rewriteFile(path)){
                             stage.setTitle("Word Note" + " [" + path + "]");
-                            pathOpenWordFile=path;
+                            pathOpenDataFile=path;
                         }
                     }
 
@@ -364,12 +392,12 @@ public class MainController extends Application implements Initializable {
                                 }
                             }
                         } else {
-                            if(callWaitAlert(Alert.AlertType.WARNING, "Поиск группы данных", null, "Строка поиска пуста").get()==ButtonType.OK) {
+                            if(callAlert(Alert.AlertType.WARNING, "Поиск группы данных", null, "Строка поиска пуста",true).get()==ButtonType.OK) {
                                 continue;
                             }
                         }
                         if (numberWord == -1) {
-                            if(callWaitAlert(Alert.AlertType.INFORMATION, "Поиск группы данных", null, "Группа данных по данному запросу не обнаружена").get()==ButtonType.OK) {
+                            if(callAlert(Alert.AlertType.INFORMATION, "Поиск группы данных", null, "Группа данных по данному запросу не обнаружена",true).get()==ButtonType.OK) {
                                 continue;
                             }
                         }
@@ -383,7 +411,7 @@ public class MainController extends Application implements Initializable {
                     }
                 }
             } else {
-                callAlert(Alert.AlertType.WARNING, "Невозможно найти группу данных", null, "Группы данных отсутствуют");
+                callAlert(Alert.AlertType.WARNING, "Невозможно найти группу данных", null, "Группы данных отсутствуют",false);
             }
 
         });
